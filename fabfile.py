@@ -71,7 +71,7 @@ def pull():
         run('git pull')
 
 def pre_deploy():
-    compress_assets()
+    compress_assets(bundle=True)
 
 def post_deploy():
     cleanup_assets()
@@ -134,12 +134,14 @@ def celery():
     celery_stop()
     celery_start()
 
+@parallel
 def celery_stop():
     with cd(env.NEWSBLUR_PATH):
         run('sudo supervisorctl stop celery')
         with settings(warn_only=True):
             run('./utils/kill_celery.sh')
 
+@parallel
 def celery_start():
     with cd(env.NEWSBLUR_PATH):
         run('sudo supervisorctl start celery')
@@ -149,7 +151,7 @@ def kill_celery():
     with cd(env.NEWSBLUR_PATH):
         run('ps aux | grep celeryd | egrep -v grep | awk \'{print $2}\' | sudo xargs kill -9')
 
-def compress_assets():
+def compress_assets(bundle=False):
     local('jammit -c assets.yml --base-url http://www.newsblur.com --output static')
     local('tar -czf static.tgz static/*')
 
@@ -310,7 +312,7 @@ def setup_psycopg():
     
 def setup_python():
     sudo('easy_install -U pip')
-    sudo('easy_install -U fabric django readline pyflakes iconv celery django-celery django-celery-with-redis django-compress South django-extensions pymongo BeautifulSoup pyyaml nltk==0.9.9 lxml oauth2 pytz boto seacucumber django_ses mongoengine redis gevent requests')
+    sudo('easy_install -U fabric django readline pyflakes iconv celery django-celery django-celery-with-redis django-compress South django-extensions pymongo stripe BeautifulSoup pyyaml nltk==0.9.9 lxml oauth2 pytz boto seacucumber django_ses mongoengine redis gevent requests')
     
     put('config/pystartup.py', '.pystartup')
     with cd(os.path.join(env.NEWSBLUR_PATH, 'vendor/cjson')):
@@ -419,6 +421,7 @@ def setup_app_firewall():
     sudo('ufw allow ssh')
     sudo('ufw allow 80')
     sudo('ufw allow 8888')
+    sudo('ufw allow 443')
     sudo('ufw --force enable')
 
 def setup_app_motd():
@@ -455,7 +458,6 @@ def setup_node():
     sudo('npm install -g supervisor')
     sudo('ufw allow 8888')
     put('config/supervisor_node.conf', '/etc/supervisor/conf.d/node.conf', use_sudo=True)
-
 
     
 # ==============
@@ -513,6 +515,10 @@ def setup_redis():
     sudo('mkdir -p /var/lib/redis')
     sudo('update-rc.d redis defaults')
     sudo('/etc/init.d/redis start')
+
+def setup_db_munin():
+    sudo('cp -rs %s/config/munin/mongo* /etc/munin/plugins/' % env.NEWSBLUR_PATH)
+
     
 # ================
 # = Setup - Task =

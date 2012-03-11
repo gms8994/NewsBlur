@@ -50,6 +50,8 @@ javascripts:
         - media/js/jquery.flot.js
         - media/js/jquery.tipsy.js
         - media/js/jquery.chosen.js
+        - media/js/jquery.linkify.js
+        - media/js/audio.js
         - media/js/socket.io-client.0.8.7.js
         - media/js/inflector.js
         - media/js/underscore.js
@@ -87,7 +89,8 @@ javascripts:
         - media/js/newsblur/reader_utils.js
         - media/js/newsblur/assetmodel.js
         - media/js/mobile/newsblur/mobile_workspace.js
-    paypal:
+    payments:
+        - media/js/newsblur/stripe_form.js
         - media/js/newsblur/paypal_return.js
     bookmarklet:
         - media/js/jquery-1.5.1.min.js

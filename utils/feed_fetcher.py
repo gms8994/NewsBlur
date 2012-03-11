@@ -208,7 +208,7 @@ class ProcessFeed:
             # if story.get('published') > end_date:
             #     end_date = story.get('published')
             story_guids.append(story.get('guid') or story.get('link'))
-        
+
         existing_stories = list(MStory.objects(
             # story_guid__in=story_guids,
             story_date__gte=start_date,
@@ -284,6 +284,8 @@ class Dispatcher:
                 if self.options.get('fake'):
                     skip = True
                     weight = "-"
+                    quick = "-"
+                    rand = "-"
                 elif self.options.get('quick'):
                     weight = feed.stories_last_month * feed.num_subscribers
                     random_weight = random.randint(1, max(weight, 1))
@@ -292,10 +294,11 @@ class Dispatcher:
                     if random_weight < 100 and rand < quick:
                         skip = True
                 if skip:
-                    logging.debug('   ---> [%-30s] ~BGFaking fetch, skipping (%s/month, %s subs)...' % (
+                    logging.debug('   ---> [%-30s] ~BGFaking fetch, skipping (%s/month, %s subs, %s < %s)...' % (
                         unicode(feed)[:30],
                         weight,
-                        feed.num_subscribers))
+                        feed.num_subscribers,
+                        rand, quick))
                     continue
                 
                 ffeed = FetchFeed(feed_id, self.options)
@@ -344,6 +347,7 @@ class Dispatcher:
             
             feed = self.refresh_feed(feed_id)
             if ((self.options['force']) or 
+                (random.random() > .9) or
                 (fetched_feed and
                  feed.feed_link and
                  feed.has_page and
