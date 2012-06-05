@@ -23,6 +23,9 @@ from zebra.signals import zebra_webhook_customer_subscription_created
 class Profile(models.Model):
     user              = models.OneToOneField(User, unique=True, related_name="profile")
     is_premium        = models.BooleanField(default=False)
+    premium_start_date = models.DateTimeField(blank=True, null=True)
+    premium_end_date  = models.DateTimeField(blank=True, null=True)
+    premium_cancel_date = models.DateTimeField(blank=True, null=True)
     send_emails       = models.BooleanField(default=True)
     preferences       = models.TextField(default="{}")
     view_settings     = models.TextField(default="{}")
