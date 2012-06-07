@@ -57,7 +57,13 @@ class Profile(models.Model):
             print " ---> Profile not saved. Table isn't there yet."
     
     def activate_premium(self):
+
+        now = datetime.datetime.now()
         self.send_new_premium_email()
+
+        self.is_premium = True
+        self.premium_start_date = now
+        self.premium_end_date = now + datetime.timedelta(days=365)
         
         self.is_premium = True
         self.save()
